@@ -1,5 +1,5 @@
-const { pool } = require('lib/db');
-const { applyCors } = require('lib/helpers');
+const { pool } = require('/lib/db');
+const { applyCors } = require('/lib/helpers');
 
 module.exports = async (req, res) => {
   console.log('starting categories');
