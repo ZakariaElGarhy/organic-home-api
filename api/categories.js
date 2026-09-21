@@ -2,6 +2,7 @@ const { pool } = require('../lib/db');
 const { applyCors } = require('../lib/helpers');
 
 module.exports = async (req, res) => {
+  
   applyCors(req, res);
   if (req.method === 'OPTIONS') return res.status(204).end();
 
