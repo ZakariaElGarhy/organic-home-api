@@ -2,6 +2,7 @@ const { pool } = require('../lib/db');
 const { applyCors } = require('../lib/helpers');
 
 module.exports = async (req, res) => {
+  console.log('starting categories');
   applyCors(req, res);
 
   if (req.method === 'OPTIONS') {
@@ -14,6 +15,7 @@ module.exports = async (req, res) => {
       FROM posts
       ORDER BY created_at DESC
     `);
+    console.log('query done', rows.length);
 
     const grouped = {};
 
