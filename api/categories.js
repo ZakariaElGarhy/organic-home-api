@@ -2,20 +2,48 @@ const { pool } = require('../lib/db');
 const { applyCors } = require('../lib/helpers');
 
 module.exports = async (req, res) => {
-  
   applyCors(req, res);
-  if (req.method === 'OPTIONS') return res.status(204).end();
 
-  const { rows } = await pool.query('SELECT category, cover_image FROM posts ORDER BY created_at DESC');
-
-  const grouped = new Map();
-  for (const row of rows) {
-    const current = grouped.get(row.category);
-    grouped.set(row.category, {
-      count: (current ? current.count : 0) + 1,
-      image: current ? current.image : row.cover_image,
-    });
+  if (req.method === 'OPTIONS') {
+    return res.status(204).end();
   }
 
-  res.status(200).json([...grouped.entries()].map(([name, details]) => ({ name, ...details })));
+  try {
+    const { rows } = await pool.query(`
+      SELECT category, cover_image
+      FROM posts
+      ORDER BY created_at DESC
+    `);
+
+    const grouped = {};
+
+    for (const row of rows) {
+      const category = row.category;
+
+      if (!grouped[category]) {
+        grouped[category] = {
+          count: 0,
+          image: row.cover_image
+        };
+      }
+
+      grouped[category].count++;
+    }
+
+    const result = Object.entries(grouped).map(([name, details]) => ({
+      name,
+      count: details.count,
+      image: details.image
+    }));
+
+    return res.status(200).json(result);
+
+  } catch (error) {
+    console.error('Categories API error:', error);
+
+    return res.status(500).json({
+      error: 'Failed to load categories',
+      details: error.message
+    });
+  }
 };
