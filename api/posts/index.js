@@ -9,7 +9,6 @@ module.exports = async (req, res) => {
   if (req.method === 'GET') {
     const { search, featured } = req.query;
     let category = req.query.category;
-    if (category === 'Living Room') category = 'Living Rooms';
 
     const conditions = [];
     const params = [];
