@@ -22,3 +22,4 @@ module.exports = async (req, res) => {
   await createSession(user.id, res);
   res.status(200).json({ username: user.username, role: user.role });
 };
+node -e "console.log(require('crypto').scryptSync('hagar123??', process.env.SESSION_SECRET || 'home-decor-dev-salt', 64).toString('hex'))"
