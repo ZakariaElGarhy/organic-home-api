@@ -1,6 +1,6 @@
 const { put } = require('@vercel/blob');
-const { requireAdmin } = require('../lib/auth');
-const { applyCors } = require('../lib/helpers');
+const { requireAdmin } = require('./lib/auth');
+const { applyCors } = require('./lib/helpers');
 
 // Vercel's default body parser doesn't handle raw file uploads well,
 // so we read the incoming file as a raw buffer ourselves.
