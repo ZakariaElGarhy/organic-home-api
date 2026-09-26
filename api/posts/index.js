@@ -1,6 +1,6 @@
 const { pool } = require('../lib/db');
 const { requireAdmin } = require('../lib/auth');
-const { toApiPost, applyCors } = require('../lib/helpers');
+const { toApiPost, applyCors, purgeCache } = require('../lib/helpers');
 
 module.exports = async (req, res) => {
   applyCors(req, res);
@@ -54,6 +54,7 @@ module.exports = async (req, res) => {
       [body.title, body.slug, body.category, body.accent_color, body.intro_text, body.cover_image, JSON.stringify(body.products), body.conclusion_text],
     );
 
+        await purgeCache(['/api/posts', '/api/categories', `/api/posts/slug/${rows[0].slug}`]);
     return res.status(201).json(toApiPost(rows[0]));
   }
 

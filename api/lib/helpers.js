@@ -26,4 +26,30 @@ function applyCors(req, res) {
   }
 }
 
-module.exports = { toApiPost, applyCors };
+async function purgeCache(paths) {
+  const token = process.env.CLOUDFLARE_API_TOKEN;
+  const zoneId = process.env.CLOUDFLARE_ZONE_ID;
+  const baseUrl = process.env.API_BASE_URL;
+
+  if (!token || !zoneId || !baseUrl) {
+    console.error('Cloudflare purge not configured (missing env vars), skipping');
+    return;
+  }
+
+  const files = paths.map((p) => `${baseUrl}${p}`);
+
+  try {
+    await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ files }),
+    });
+  } catch (err) {
+    console.error('Cache purge failed', err);
+  }
+}
+module.exports = { toApiPost, applyCors ,purgeCache };
+

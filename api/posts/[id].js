@@ -1,6 +1,6 @@
 const { pool } = require('../lib/db');
 const { requireAdmin } = require('../lib/auth');
-const { toApiPost, applyCors } = require('../lib/helpers');
+const { toApiPost, applyCors, purgeCache } = require('../lib/helpers');
 
 module.exports = async (req, res) => {
   applyCors(req, res);
@@ -46,13 +46,15 @@ module.exports = async (req, res) => {
       params,
     );
 
-    if (!rows[0]) return res.status(404).json({ error: 'Post not found' });
+        if (!rows[0]) return res.status(404).json({ error: 'Post not found' });
+    await purgeCache(['/api/posts', '/api/categories', `/api/posts/slug/${rows[0].slug}`]);
     return res.status(200).json(toApiPost(rows[0]));
   }
 
-  if (req.method === 'DELETE') {
-    const { rows } = await pool.query('DELETE FROM posts WHERE id = $1 RETURNING id', [id]);
+    if (req.method === 'DELETE') {
+    const { rows } = await pool.query('DELETE FROM posts WHERE id = $1 RETURNING id, slug', [id]);
     if (!rows[0]) return res.status(404).json({ error: 'Post not found' });
+    await purgeCache(['/api/posts', '/api/categories', `/api/posts/slug/${rows[0].slug}`]);
     return res.status(204).end();
   }
 
