@@ -28,13 +28,18 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'File too large (max 8MB)' });
   }
 
-  const blob = await put(filename, fileBuffer, {
+    const blob = await put(filename, fileBuffer, {
     access: 'public',
     contentType,
     addRandomSuffix: true,
   });
 
-  res.status(200).json({ url: blob.url });
+  const url = blob.url.replace(
+    'https://p6e2mdvxchq4yewf.public.blob.vercel-storage.com',
+    'https://img.organichomeedit.com'
+  );
+
+  res.status(200).json({ url });
 };
 
 // Tell Vercel not to auto-parse the body as JSON, since we're reading raw file bytes.
