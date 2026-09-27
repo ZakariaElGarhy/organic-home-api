@@ -22,9 +22,16 @@ module.exports = async (req, res) => {
       conditions.push(`(title ILIKE $${params.length} OR category ILIKE $${params.length})`);
     }
 
+        const limit = featured === 'true' ? 6 : Math.min(parseInt(req.query.limit, 10) || 100, 100);
+    const offset = parseInt(req.query.offset, 10) || 0;
+
     let sql = 'SELECT * FROM posts';
     if (conditions.length) sql += ' WHERE ' + conditions.join(' AND ');
-    sql += ' ORDER BY created_at DESC LIMIT ' + (featured === 'true' ? 6 : 100);
+    sql += ' ORDER BY created_at DESC';
+    params.push(limit);
+    sql += ` LIMIT $${params.length}`;
+    params.push(offset);
+    sql += ` OFFSET $${params.length}`;
 
     const { rows } = await pool.query(sql, params);
     return res.status(200).json(rows.map(toApiPost));
