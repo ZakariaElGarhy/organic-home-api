@@ -36,17 +36,23 @@ async function purgeCache(paths) {
     return;
   }
 
-  const files = paths.map((p) => `${baseUrl}${p}`);
+  // Prefix purge wants "host/path" with no https://
+  const host = baseUrl.replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  const prefixes = paths.map((p) => `${host}${p}`);
 
   try {
-    await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, {
+    const response = await fetch(`https://api.cloudflare.com/client/v4/zones/${zoneId}/purge_cache`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ files }),
+      body: JSON.stringify({ prefixes }),
     });
+    const result = await response.json().catch(() => null);
+    if (!response.ok || !result || !result.success) {
+      console.error('Cloudflare purge was rejected', response.status, JSON.stringify(result && result.errors));
+    }
   } catch (err) {
     console.error('Cache purge failed', err);
   }
